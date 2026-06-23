@@ -1,0 +1,25 @@
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Virtual environment
+venv/
+
+# SQLite database
+*.db
+app.db
+
+# VS Code settings
+.vscode/
+
+# Pytest cache
+.pytest_cache/
+
+# Environment variables
+.env
+
+# macOS files
+.DS_Store
+
+# Logs
+*.log

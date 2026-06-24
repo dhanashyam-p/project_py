@@ -2,7 +2,7 @@ import requests
 import streamlit as st
 from datetime import date, datetime
 
-API_BASE_URL = "http://127.0.0.1:8000"
+API_BASE_URL = "https://project-py-4kuc.onrender.com"
 REQUEST_TIMEOUT = 10
 
 

@@ -1,6 +1,7 @@
 fastapi
 uvicorn
-streamlit
-pydantic
+passlib
 bcrypt
-requests
+pydantic
+email-validator
+python-multipart

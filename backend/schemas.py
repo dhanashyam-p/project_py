@@ -1,58 +1,73 @@
 from datetime import date
 from typing import Literal
-from pydantic import BaseModel, EmailStr, Field
 
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
+
+# Type aliases
 PriorityType = Literal["low", "medium", "high"]
 StatusType = Literal["pending", "in-progress", "done"]
 
-# Schema for user registration request
-class UserRegister(BaseModel):
+
+# Base model
+class BaseSchema(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+
+# User registration request
+class UserRegister(BaseSchema):
     email: EmailStr
     password: str = Field(..., min_length=4, max_length=100)
 
-# Schema for user login request
-class UserLogin(BaseModel):
+
+# User login request
+class UserLogin(BaseSchema):
     email: EmailStr
     password: str = Field(..., min_length=4, max_length=100)
 
-# Schema for user response data
-class UserResponse(BaseModel):
+
+# User response
+class UserResponse(BaseSchema):
     id: int
     email: EmailStr
 
-# Schema for authentication token response
-class TokenResponse(BaseModel):
+
+# Authentication response
+class TokenResponse(BaseSchema):
     access_token: str
     token_type: str = "bearer"
     email: EmailStr
 
-#  message response schema
-#task created sucssfully 
-class MessageResponse(BaseModel):
+
+# Generic message response
+class MessageResponse(BaseSchema):
     message: str
 
-# Schema for creating a task
-class TaskCreate(BaseModel):
+
+# Create task request
+class TaskCreate(BaseSchema):
     title: str = Field(..., min_length=1, max_length=200)
     description: str = ""
     priority: PriorityType = "low"
     status: StatusType = "pending"
     due_date: date | None = None
 
-# Schema for updating a task
-class TaskUpdate(BaseModel):
+
+# Update task request
+class TaskUpdate(BaseSchema):
     title: str = Field(..., min_length=1, max_length=200)
     description: str = ""
     priority: PriorityType = "low"
     status: StatusType = "pending"
     due_date: date | None = None
 
-# Schema for updating task status only
-class TaskStatusUpdate(BaseModel):
+
+# Update task status
+class TaskStatusUpdate(BaseSchema):
     status: StatusType
 
-# Schema for task response data
-class TaskResponse(BaseModel):
+
+# Task response
+class TaskResponse(BaseSchema):
     id: int
     title: str
     description: str
@@ -61,8 +76,9 @@ class TaskResponse(BaseModel):
     due_date: date | None = None
     owner_email: EmailStr
 
-# Schema for task summary 
-class TaskSummary(BaseModel):
+
+# Dashboard summary
+class TaskSummary(BaseSchema):
     total: int
     pending: int
     in_progress: int

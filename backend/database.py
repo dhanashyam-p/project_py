@@ -1,8 +1,14 @@
 import sqlite3
 from pathlib import Path
 
-BASE_DIR = Path(__file__).resolve().parent
-DB_PATH = BASE_DIR / "app.db"
+from backend.config import DATABASE_URL
+
+if DATABASE_URL.startswith("sqlite:///"):
+    DB_PATH = Path(DATABASE_URL.replace("sqlite:///", ""))
+else:
+    BASE_DIR = Path(__file__).resolve().parent
+    DB_PATH = BASE_DIR / "app.db"
+
 
 # Create and return a database connection
 def get_connection() -> sqlite3.Connection:
@@ -10,10 +16,12 @@ def get_connection() -> sqlite3.Connection:
     conn.row_factory = sqlite3.Row
     return conn
 
+
 # Initialize database tables if they do not exist
 def init_db() -> None:
     with get_connection() as conn:
         cursor = conn.cursor()
+
         cursor.execute(
             """
             CREATE TABLE IF NOT EXISTS users (
@@ -23,6 +31,7 @@ def init_db() -> None:
             )
             """
         )
+
         cursor.execute(
             """
             CREATE TABLE IF NOT EXISTS tasks (
@@ -37,4 +46,5 @@ def init_db() -> None:
             )
             """
         )
+
         conn.commit()

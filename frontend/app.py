@@ -2,7 +2,11 @@ import requests
 import streamlit as st
 from datetime import date, datetime
 
-API_BASE_URL = "https://project-py-4kuc.onrender.com"
+from config import BACKEND_URL
+from components.header import show_header
+from components.sidebar import show_sidebar
+from components.footer import show_footer
+API_BASE_URL = BACKEND_URL
 REQUEST_TIMEOUT = 10
 
 
@@ -116,54 +120,13 @@ def require_login():
     return True
 
 
-def render_sidebar():
-    st.sidebar.title("📋 Task Manager")
-    st.sidebar.write("Stay organized, stay on track!")
-    st.sidebar.write("---")
-
-    email = st.session_state.get("email")
-    username = st.session_state.get("username")
-    if email:
-        if st.sidebar.button("👤 User"):
-            st.session_state["show_user_details"] = not st.session_state.get("show_user_details", False)
-
-        if st.session_state.get("show_user_details"):
-            st.sidebar.info("Username: " + (username or "-") + "\n\nEmail: " + email)
-
-        st.sidebar.write("---")
-
-        if st.sidebar.button("Dashboard"):
-            go_to("dashboard")
-
-        if st.sidebar.button("Add Task"):
-            go_to("add_task")
-
-        if st.sidebar.button("Logout"):
-            logout()
-    else:
-        st.sidebar.write("Please login or register.")
-
-    st.sidebar.write("---")
-
-    if st.sidebar.button("ℹ️ About"):
-        st.session_state["show_about"] = not st.session_state.get("show_about", False)
-
-    if st.session_state.get("show_about"):
-        st.sidebar.markdown(
-            "**About Task Manager**\n\n"
-            "This app helps you keep track of your daily tasks. "
-            "You can add tasks, set their priority and due date, "
-            "update their status as you work on them, and mark them "
-            "done once finished. It keeps all your to-dos organized "
-            "in one simple dashboard."
-        )
-
-
 def render_login_page():
+    show_header()
+
     st.markdown("## 📋 Task Manager")
     st.caption("Simple. Organized. Yours.")
     st.write("---")
-    st.title("Login")
+    st.title("🔐 Login")
 
     with st.form("login_form"):
         email = st.text_input("Email")
@@ -185,21 +148,25 @@ def render_login_page():
                 st.session_state["email"] = data["email"]
                 st.session_state["username"] = data["email"].split("@")[0]
                 st.session_state["page"] = "dashboard"
-                st.success("Login successful.")
+                st.toast("Login Successful 🎉")
                 st.rerun()
             else:
-                st.error(str(data))
+                st.error(f"❌ {data}")
 
     st.write("New user?")
     if st.button("Go to Register"):
         go_to("register")
 
+    show_footer()
+
 
 def render_register_page():
+    show_header()
+
     st.markdown("## 📋 Task Manager")
     st.caption("Simple. Organized. Yours.")
     st.write("---")
-    st.title("Register")
+    st.title("📝 Register")
 
     with st.form("register_form"):
         email = st.text_input("Email")
@@ -220,21 +187,23 @@ def render_register_page():
             )
 
             if ok:
-                st.success("Registration successful. Please login.")
+                st.toast("Registration Successful 🎉")
                 st.session_state["page"] = "login"
                 st.rerun()
             else:
-                st.error(str(data))
+                st.error(f"❌ {data}")
 
     if st.button("Back to Login"):
         go_to("login")
+
+    show_footer()
 
 
 def fetch_summary():
     ok, data = api_call("GET", "/tasks/summary", require_auth=True)
     if ok:
         return data
-    st.error(str(data))
+    st.error(f"❌ {data}")
     return None
 
 
@@ -249,7 +218,7 @@ def fetch_tasks(status_filter, priority_filter):
     ok, data = api_call("GET", "/tasks/", params=params, require_auth=True)
     if ok:
         return data
-    st.error(str(data))
+    st.error(f"❌ {data}")
     return None
 
 
@@ -345,7 +314,7 @@ def render_task_actions(task_list):
                 st.success("Task marked as done.")
                 st.rerun()
             else:
-                st.error(str(data))
+                st.error(f"❌ {data}")
 
         elif action == "Delete":
             st.session_state["delete_task_id"] = selected_task_id
@@ -365,10 +334,10 @@ def render_task_actions(task_list):
             st.session_state["delete_task_id"] = None
 
             if ok:
-                st.success("Task deleted successfully.")
+                st.toast("Task Deleted 🎉")
                 st.rerun()
             else:
-                st.error(str(data))
+                st.error(f"❌ {data}")
 
         if no_col.button("Cancel"):
             st.session_state["delete_task_id"] = None
@@ -379,8 +348,10 @@ def render_dashboard_page():
     if not require_login():
         return
 
+    show_header()
+
     username = st.session_state.get("username")
-    st.title("Dashboard")
+    st.title("📊 Dashboard")
     if username:
         st.markdown(f"#### 👋 Hi, {username}!")
     st.caption("Here's an overview of your tasks.")
@@ -388,6 +359,16 @@ def render_dashboard_page():
     summary = fetch_summary()
     if summary:
         render_summary_cards(summary)
+
+        st.write("")
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+            st.success("✔ Backend Connected")
+
+        with col2:
+            st.info("📊 FastAPI + Streamlit")
 
     st.write("")
     st.write("---")
@@ -402,6 +383,7 @@ def render_dashboard_page():
     task_list = fetch_tasks(status_filter, priority_filter)
 
     if task_list is None:
+        show_footer()
         return
 
     st.write("---")
@@ -440,10 +422,14 @@ def render_dashboard_page():
     st.write("---")
     render_task_actions(task_list)
 
+    show_footer()
+
 
 def render_add_task_page():
     if not require_login():
         return
+
+    show_header()
 
     st.title("➕ Add Task")
 
@@ -458,6 +444,7 @@ def render_add_task_page():
     if submitted:
         if title.strip() == "":
             st.error("Title is required.")
+            show_footer()
             return
 
         payload = {
@@ -471,21 +458,23 @@ def render_add_task_page():
         ok, data = api_call("POST", "/tasks/", json=payload, require_auth=True)
 
         if ok:
-            st.success("Task created successfully.")
+            st.toast("Task Created 🎉")
             st.session_state["page"] = "dashboard"
             st.rerun()
         else:
-            st.error(str(data))
+            st.error(f"❌ {data}")
 
     if st.button("Back to Dashboard"):
         go_to("dashboard")
+
+    show_footer()
 
 
 def fetch_task_detail(task_id):
     ok, data = api_call("GET", "/tasks/" + str(task_id), require_auth=True)
     if ok:
         return data
-    st.error(str(data))
+    st.error(f"❌ {data}")
     return None
 
 
@@ -493,11 +482,14 @@ def render_task_detail_page():
     if not require_login():
         return
 
+    show_header()
+
     task_id = st.session_state.get("selected_task_id")
     if not task_id:
         st.warning("No task selected.")
         if st.button("Back to Dashboard"):
             go_to("dashboard")
+        show_footer()
         return
 
     st.title("📝 Task Detail")
@@ -505,6 +497,7 @@ def render_task_detail_page():
     task = fetch_task_detail(task_id)
 
     if not task:
+        show_footer()
         return
 
     st.write("ID: " + str(task["id"]))
@@ -542,32 +535,38 @@ def render_task_detail_page():
             st.session_state[delete_key] = False
 
             if ok:
-                st.success("Task deleted successfully.")
+                st.toast("Task Deleted 🎉")
                 st.session_state["selected_task_id"] = None
                 go_to("dashboard")
             else:
-                st.error(str(data))
+                st.error(f"❌ {data}")
 
         if no_col.button("Cancel"):
             st.session_state[delete_key] = False
             st.rerun()
+
+    show_footer()
 
 
 def render_edit_task_page():
     if not require_login():
         return
 
+    show_header()
+
     task_id = st.session_state.get("selected_task_id")
     if not task_id:
         st.warning("No task selected.")
         if st.button("Back to Dashboard"):
             go_to("dashboard")
+        show_footer()
         return
 
     st.title("✏️ Edit Task")
 
     task = fetch_task_detail(task_id)
     if not task:
+        show_footer()
         return
 
     default_due_date = parse_due_date_for_input(task.get("due_date"))
@@ -594,6 +593,7 @@ def render_edit_task_page():
     if submitted:
         if title.strip() == "":
             st.error("Title is required.")
+            show_footer()
             return
 
         payload = {
@@ -607,20 +607,27 @@ def render_edit_task_page():
         ok, data = api_call("PUT", "/tasks/" + str(task_id), json=payload, require_auth=True)
 
         if ok:
-            st.success("Task updated successfully.")
+            st.toast("Task Updated 🎉")
             go_to("dashboard")
         else:
-            st.error(str(data))
+            st.error(f"❌ {data}")
 
     if st.button("Cancel"):
         go_to("dashboard")
 
+    show_footer()
+
 
 def main():
-    st.set_page_config(page_title="Task Manager", page_icon="📋")
+    st.set_page_config(
+        page_title="Task Manager",
+        page_icon="📋",
+        layout="wide",
+        initial_sidebar_state="expanded",
+    )
 
     init_session_state()
-    render_sidebar()
+    show_sidebar()
     page = st.session_state.get("page", "login")
 
     if page == "login":

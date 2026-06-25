@@ -666,7 +666,59 @@ def render_edit_task_page():
         go_to("dashboard")
 
     show_footer()
+def render_analytics_page():
+    if not require_login():
+        return
 
+    show_header()
+
+    st.title("📊 Analytics")
+
+    summary = fetch_summary()
+
+    if summary:
+        st.metric("Total Tasks", summary.get("total", 0))
+        st.metric("Pending", summary.get("pending", 0))
+        st.metric("In Progress", summary.get("in_progress", 0))
+        st.metric("Completed", summary.get("done", 0))
+
+    show_footer()
+
+
+def render_profile_page():
+    if not require_login():
+        return
+
+    show_header()
+
+    st.title("👤 Profile")
+
+    st.write("### User Information")
+    st.write("**Username:**", st.session_state.get("username"))
+    st.write("**Email:**", st.session_state.get("email"))
+
+    show_footer()
+
+
+def render_settings_page():
+    if not require_login():
+        return
+
+    show_header()
+
+    st.title("⚙️ Settings")
+
+    st.subheader("Account")
+
+    st.write("Email:", st.session_state.get("email"))
+    st.write("Username:", st.session_state.get("username"))
+
+    st.write("---")
+
+    if st.button("🚪 Logout", use_container_width=True):
+        logout()
+
+    show_footer()
 
 def main():
     st.set_page_config(
@@ -677,23 +729,47 @@ def main():
     )
 
     init_session_state()
-    show_sidebar()
+
+    # Get current page
+    page = st.session_state.get("page", "login")
+
+    # Show sidebar only after login
+    if page not in ["login", "register"]:
+        show_sidebar()
+
+    # Update page after sidebar selection
     page = st.session_state.get("page", "login")
 
     if page == "login":
         render_login_page()
+
     elif page == "register":
         render_register_page()
+
     elif page == "dashboard":
         render_dashboard_page()
+
     elif page == "tasks":
         render_tasks_page()
+
     elif page == "add_task":
         render_add_task_page()
+
     elif page == "task_detail":
         render_task_detail_page()
+
     elif page == "edit_task":
         render_edit_task_page()
+
+    elif page == "analytics":
+        render_analytics_page()
+
+    elif page == "profile":
+        render_profile_page()
+
+    elif page == "settings":
+        render_settings_page()
+
     else:
         st.session_state["page"] = "login"
         st.rerun()

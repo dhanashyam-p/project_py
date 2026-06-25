@@ -22,15 +22,12 @@ sessions: dict[str, str] = {}
 # Hash a user's password before storing it
 def hash_password(password: str) -> str:
     try:
-        #encrypt the password
         return pwd_context.hash(password)
-    # password-related errors
-    except ValueError as exc:
-        
+    except Exception as exc:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Password is too long. Use at most 72 characters.",
-        ) from exc
+            status_code=500,
+            detail=str(exc),
+        )
 # Verify a plain password against its hashed version
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     try:

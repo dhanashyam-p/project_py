@@ -6,6 +6,7 @@ from config import BACKEND_URL
 from components.header import show_header
 from components.sidebar import show_sidebar
 from components.footer import show_footer
+
 API_BASE_URL = BACKEND_URL
 REQUEST_TIMEOUT = 10
 
@@ -357,18 +358,22 @@ def render_dashboard_page():
     st.caption("Here's an overview of your tasks.")
 
     summary = fetch_summary()
+
     if summary:
         render_summary_cards(summary)
 
         st.write("")
+        st.subheader("📌 Quick Actions")
 
         col1, col2 = st.columns(2)
 
         with col1:
-            st.success("✔ Backend Connected")
+            if st.button("➕ Add Task", use_container_width=True):
+                go_to("add_task")
 
         with col2:
-            st.info("📊 FastAPI + Streamlit")
+            if st.button("📝 Tasks", use_container_width=True):
+                go_to("tasks")
 
     st.write("")
     st.write("---")
@@ -421,6 +426,51 @@ def render_dashboard_page():
 
     st.write("---")
     render_task_actions(task_list)
+
+    show_footer()
+
+
+def render_tasks_page():
+    if not require_login():
+        return
+
+    show_header()
+
+    st.title("📝 Tasks")
+
+    if st.button("➕ Add Task"):
+        go_to("add_task")
+
+    st.write("---")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        status_filter = st.selectbox(
+            "Filter by Status",
+            ["All", "pending", "in-progress", "done"],
+            key="tasks_status",
+        )
+
+    with col2:
+        priority_filter = st.selectbox(
+            "Filter by Priority",
+            ["All", "low", "medium", "high"],
+            key="tasks_priority",
+        )
+
+    task_list = fetch_tasks(status_filter, priority_filter)
+
+    if task_list:
+        st.dataframe(task_list, hide_index=True)
+
+        st.write("---")
+        render_task_actions(task_list)
+    else:
+        st.info("No tasks found.")
+
+    if st.button("⬅️ Back to Dashboard"):
+        go_to("dashboard")
 
     show_footer()
 
@@ -636,6 +686,8 @@ def main():
         render_register_page()
     elif page == "dashboard":
         render_dashboard_page()
+    elif page == "tasks":
+        render_tasks_page()
     elif page == "add_task":
         render_add_task_page()
     elif page == "task_detail":

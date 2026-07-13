@@ -4,7 +4,7 @@ import streamlit as st
 def show_sidebar():
     st.sidebar.title("📋 Task Manager")
 
-    # Logout at the top
+    # Keep Logout
     if st.sidebar.button("🚪 Logout", use_container_width=True):
         st.session_state.clear()
         st.session_state["page"] = "login"
@@ -24,21 +24,23 @@ def show_sidebar():
 
     current_page = st.session_state.get("page", "dashboard")
 
+    # Show current page in sidebar
     if current_page in reverse_map:
-        index = list(page_map.keys()).index(reverse_map[current_page])
+        default_index = list(page_map.keys()).index(reverse_map[current_page])
     else:
-        index = 0
+        default_index = 0
 
     selected = st.sidebar.radio(
         "Navigation",
         list(page_map.keys()),
-        index=index,
-        key="navigation",
+        index=default_index,
     )
 
-    if page_map[selected] != current_page:
-        st.session_state["page"] = page_map[selected]
-        st.rerun()
+    # Only change page when the user is on a main page
+    if current_page in reverse_map:
+        if page_map[selected] != current_page:
+            st.session_state["page"] = page_map[selected]
+            st.rerun()
 
     st.sidebar.write("---")
     st.sidebar.info("Version 1.0")

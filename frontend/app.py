@@ -732,45 +732,44 @@ def main():
     # Get current page
     page = st.session_state.get("page", "login")
 
-  # Show sidebar only after login
-# if page not in ["login", "register"]:
-#     show_sidebar()
+    # Show sidebar only after login
+    if page not in ["login", "register"]:
+        show_sidebar()
+
     # Update page after sidebar selection
-page = st.session_state.get("page", "login")
+    page = st.session_state.get("page", "login")
 
-st.write("Current Page =", page)
-
-if page == "login":
+    if page == "login":
         render_login_page()
 
-elif page == "register":
+    elif page == "register":
         render_register_page()
 
-elif page == "dashboard":
+    elif page == "dashboard":
         render_dashboard_page()
 
-elif page == "tasks":
+    elif page == "tasks":
         render_tasks_page()
 
-elif page == "add_task":
+    elif page == "add_task":
         render_add_task_page()
 
-elif page == "task_detail":
+    elif page == "task_detail":
         render_task_detail_page()
 
-elif page == "edit_task":
+    elif page == "edit_task":
         render_edit_task_page()
 
-elif page == "analytics":
+    elif page == "analytics":
         render_analytics_page()
 
-elif page == "profile":
+    elif page == "profile":
         render_profile_page()
 
-elif page == "settings":
+    elif page == "settings":
         render_settings_page()
 
-else:
+    else:
         st.session_state["page"] = "login"
         st.rerun()
 

@@ -124,9 +124,7 @@ def require_login():
 def render_login_page():
     show_header()
 
-    st.markdown("## 📋 Task Manager")
-    st.caption("Simple. Organized. Yours.")
-    st.write("---")
+    # Only Login heading (removed duplicate Task Manager heading)
     st.title("🔐 Login")
 
     with st.form("login_form"):
@@ -141,7 +139,10 @@ def render_login_page():
             ok, data = api_call(
                 "POST",
                 "/auth/login",
-                json={"email": email.strip(), "password": password},
+                json={
+                    "email": email.strip(),
+                    "password": password,
+                },
             )
 
             if ok:
@@ -160,13 +161,10 @@ def render_login_page():
 
     show_footer()
 
-
 def render_register_page():
     show_header()
 
-    st.markdown("## 📋 Task Manager")
-    st.caption("Simple. Organized. Yours.")
-    st.write("---")
+    # Only Register heading
     st.title("📝 Register")
 
     with st.form("register_form"):
@@ -184,7 +182,10 @@ def render_register_page():
             ok, data = api_call(
                 "POST",
                 "/auth/register",
-                json={"email": email.strip(), "password": password},
+                json={
+                    "email": email.strip(),
+                    "password": password,
+                },
             )
 
             if ok:
@@ -198,8 +199,6 @@ def render_register_page():
         go_to("login")
 
     show_footer()
-
-
 def fetch_summary():
     ok, data = api_call("GET", "/tasks/summary", require_auth=True)
     if ok:

@@ -732,10 +732,9 @@ def main():
     # Get current page
     page = st.session_state.get("page", "login")
 
-    # Show sidebar only after login
-    if page not in ["login", "register"]:
-        show_sidebar()
-
+  # Show sidebar only after login
+# if page not in ["login", "register"]:
+#     show_sidebar()
     # Update page after sidebar selection
 page = st.session_state.get("page", "login")
 
